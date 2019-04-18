@@ -10,7 +10,7 @@ const router = express.Router()
 const secret = process.env.SECRET
 
 
-const processingUserEntrance = (userModel) {
+const processingUserEntrance = (userModel) => {
   userModel.generateRefreshToken()
   userModel.generateAccessToken()
   userModel.save()
@@ -108,25 +108,7 @@ router.post('/confirmEntranceSignup', validConfirmToken, (req, res, next) => {
   const { email } = req;
   User.findOne({ email })
     .then((user)=> {
-        user.generateRefreshToken()
-        user.generateAccessToken()
-      user.save()
-        .then((savedRecord)=>{
-          if(userRecord) {
-            res.status(200).json({
-              results: {
-                accessToken: savedRecord.accessToken,
-                refreshToken: savedRecord.refreshToken,
-                username: savedRecord.username,
-                email: savedRecord.email
-              }
-            })
-          }
-      }).catch((error)=>{
-        res.status(500).json({
-          error: 'somethings wron, try again'
-        })
-      })
+        processingUserEntrance(user)
     })
 })
 
@@ -158,7 +140,7 @@ router.post('/checkUserLogin', (req, res, next) => {
         })
       }else {
         res.status(500).json({
-          errors: "User doesn't existed!"
+          errors: "User doesn't existe!"
         })
       }
     })
@@ -179,19 +161,8 @@ router.post('/login', (req, res, next)=> {
     bcrypt.compare(user.passwordHash, password, function(err, result) {
         if(!err) {
           /*TODO дубль*/
-          user.generateAccessToken()
-          user.generateRefreshToken()
-          user.save().then((savedRecord)=>{
-            res.status(200).json({
-              results: {
-                accessToken: savedRecord.accessToken,
-                refreshToken: savedRecord.refreshToken,
-                email: savedRecord.email,
-                name: savedRecord.name
-              }
-          })
-
-          })else {
+          processingUserEntrance(user)
+          }else {
             res.status(500).json({
               results: {
                 errors: {
