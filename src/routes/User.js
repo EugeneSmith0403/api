@@ -2,7 +2,7 @@ import express from 'express'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import confirmUserEntrance from './../helpers/mailer'
-import validConfirmToken from './../middleware/validConfirmToken'
+import validMailToken from './../middleware/validMailToken'
 import authentication from './../middleware/authentication'
 import User from './../models/User'
 
@@ -10,29 +10,29 @@ const router = express.Router()
 const secret = process.env.SECRET
 
 
-const processingUserEntrance = (userModel) => {
+const processingUserEntrance = (userModel, result) => {
   userModel.generateRefreshToken()
   userModel.generateAccessToken()
   userModel.save()
     .then((savedRecord)=>{
-      if(userRecord) {
-        res.status(200).json({
-          results: {
-            accessToken: savedRecord.accessToken,
-            refreshToken: savedRecord.refreshToken,
-            username: savedRecord.username,
-            email: savedRecord.email
+      if(savedRecord) {
+        result.status(200).json({
+            results: {
+              user: {
+                accessToken: savedRecord.accessToken,
+                refreshToken: savedRecord.refreshToken,
+                username: savedRecord.username,
+                email: savedRecord.email
+            }
           }
         })
       }
   }).catch((error)=>{
-    res.status(500).json({
+    result.status(500).json({
       error: 'somethings wron, try again'
     })
   })
 }
-
-
 
 /*проверка пользователя перед регистраций на существования если все ок
 то отправляем пользователю секретный ключ с помощью которого он шефрует свой пароль затем клиент дергает метод signup*/
@@ -41,8 +41,9 @@ router.post('/checkUserSignUp', (req, res, next) => {
     const {email} = req.body
     User.findOne({email}).then((record)=>{
       if(!record) {
-        record.generatePublicKey()
-        record.save().then((savedRecord)=>{
+        const user = new User({email})
+        user.generatePublicKey()
+        user.save().then((savedRecord)=>{
             res.status(200).json({
               results: {
                 key: savedRecord.publicKey
@@ -104,22 +105,23 @@ router.post('/signup',(req, res, next)=> {
 если все хорошо то отдаю пользователю accessToken и refreshToken пользователь
 залогинился автоматически
 */
-router.post('/confirmEntranceSignup', validConfirmToken, (req, res, next) => {
+router.post('/confirmEntranceSignup', validMailToken, (req, res, next) => {
   const { email } = req;
   User.findOne({ email })
     .then((user)=> {
-        processingUserEntrance(user)
+        user.confirmed = true;
+        processingUserEntrance(user, res)
     })
 })
 
-//authentification
-router.post('/fetchCurrentUser', validConfirmToken, (req, res, next)=> {
-  const {email} = req.body
-  User.findOne({ email}).then((user)=>{
+//возвращаю информацию текущего юзера
+router.post('/fetchCurrentUser', authentication, (req, res, next)=> {
+  const {email} = req.currentUser
+  User.findOne({ email }).then((user)=>{
     if(user) {
       res.status(200).json({
         results: {
-          user
+          user: req.currentUser
         }
       })
     }
@@ -140,7 +142,7 @@ router.post('/checkUserLogin', (req, res, next) => {
         })
       }else {
         res.status(500).json({
-          errors: "User doesn't existe!"
+          errors: "User doesn't exist!"
         })
       }
     })
@@ -157,28 +159,26 @@ router.post('/checkUserLogin', (req, res, next) => {
 */
 router.post('/login', (req, res, next)=> {
   const {password, email} = req.body
-  User.find({email}).then((user)=> {
+  User.findOne({email}).then((user)=> {
     bcrypt.compare(user.passwordHash, password, function(err, result) {
         if(!err) {
-          /*TODO дубль*/
-          processingUserEntrance(user)
+          processingUserEntrance(user, res)
           }else {
             res.status(500).json({
               results: {
                 errors: {
-                  'Invalid password'
+                  message: 'Invalid password'
                 }
               }
             })
           }
-        }
     });
 
   }).catch((err)=>{
     res.status(500).json({
       results: {
         errors: {
-          'somethings wrong'
+          message: 'somethings wrong'
         }
       }
     })
@@ -186,22 +186,27 @@ router.post('/login', (req, res, next)=> {
 
 })
 
-router.post('/logout', (req, res, next)=> {})
+router.post('/logout', (req, res, next)=> {
+  const {email, password} = req.body
+  User.findOne({email})
+    .then((userModel)=>{
+      userModel.generateAccessToken()
+      userModel.generateRefreshToken()
+      res.status(200).json({
+        results: {}
+      })
+    })
+    .catch((error)=>{
+      res.status(500).json({
+        results: {
+          message: 'somethings wrong, try again'
+        }
+      })
+    })
+})
 
 router.post('/resetPassword', (req, res, next)=> {})
-router.post('/currentUser', authentication,  (req, res, next)=> {
-  const userData = {
-    token: user.accessToken,
-    email: user.email,
-    name: user.name
-  }
-  res.status(200).json({
-    results: {
-      accessToken:
-      ...userData
-    }
-  })
-})
+
 
 
 export default router

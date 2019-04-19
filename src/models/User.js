@@ -35,7 +35,7 @@ schema.methods.checkPassword = function checkPassword(password) {
 
 schema.methods.generateAccessToken = function generateAccessToken() {
   const hour = Math.floor(Date.now() / 1000) + (60 * 60)
-  this.confirmationToken = this.generateJWT({exp: hour})
+  this.accessToken = this.generateJWT({exp: hour})
 }
 
 schema.methods.generateRefreshToken = function generateRefreshToken() {
