@@ -62,7 +62,6 @@ const checkValidToken = (token = '', result, request, next, isRefresh = false) =
 
 export default (req,res, next) => {
   const {accessToken, refreshToken} = req.body
-  console.log(accessToken)
   const clearAccessToken = accessToken && accessToken.split(' ')[1]
 
   if(accessToken) {

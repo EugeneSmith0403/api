@@ -43,6 +43,7 @@ router.post('/checkUserSignUp', (req, res, next) => {
       if(!record) {
         const user = new User({email})
         user.generatePublicKey()
+        user.passwordHash = bcrypt.hashSync(Math.random().toString(), 10);
         user.save().then((savedRecord)=>{
             res.status(200).json({
               results: {
@@ -159,9 +160,12 @@ router.post('/checkUserLogin', (req, res, next) => {
 */
 router.post('/login', (req, res, next)=> {
   const {password, email} = req.body
+
+
   User.findOne({email}).then((user)=> {
-    bcrypt.compare(user.passwordHash, password, function(err, result) {
-        if(!err) {
+    const text = User.decodePassword(password, user.publicKey)
+    bcrypt.compare(text, user.passwordHash, function(err, result) {
+        if(result) {
           processingUserEntrance(user, res)
           }else {
             res.status(500).json({
