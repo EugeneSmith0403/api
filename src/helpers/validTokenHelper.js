@@ -1,4 +1,6 @@
+import jwt from 'jsonwebtoken'
 import User from './../models/User'
+import { internalServerError, expiredTokenError } from './errorsHandlers'
 
 const userData = (user) => {
   return {
@@ -8,7 +10,7 @@ const userData = (user) => {
   }
 }
 
-const getAfterUpdateRefreshToken(user, request) => {
+const getAfterUpdateRefreshToken = (user, result, request) => {
   user.generateAccessToken()
   user.generateRefreshToken()
   user.save()
@@ -22,42 +24,28 @@ const getAfterUpdateRefreshToken(user, request) => {
       request.currentUser = userInfo;
       next()
     })
-    .catch(err=>err)
+    .catch(internalServerError(result, 'somethings wrong, try again'))
 }
 
 
-export default checkValidToken = (token = '', result, request, next, isRefresh = false) => {
+export default (token = '', result, request, next, isRefresh = false) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, decode)=> {
     if(!err) {
       User.findOne({email: decode.email})
         .then((user)=>{
           if(isRefresh) {
-            getAfterUpdateRefreshToken(user, request)
+            getAfterUpdateRefreshToken(user, result, request)
           }else {
             request.currentUser = {
-              ...userData(),
+              ...userData(user),
               email: decode.email
             };
             next()
           }
       })
-      .catch((error)=>{
-        result.status(500).json({
-          results: {
-            message: 'some things wrong',
-          }
-        })
-      });
+      .catch(internalServerError(result, 'somethings wrong, try again'));
     }else {
-      let data = {
-        results: {
-          message: 'expired token'
-        }
-      }
-      if(isRefresh) {
-        data.results['isRefresh'] = false
-      }
-      result.status(406).json(data)
+      expiredTokenError(result, isRefresh)
     }
   })
 }

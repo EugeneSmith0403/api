@@ -12,6 +12,7 @@
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
     "babel-eslint": "^10.0.1",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "bcrypt": "^3.0.5",
@@ -31,5 +32,6 @@
     "nodemailer": "^6.1.0",
     "nodemon": "^1.18.10",
     "prettier": "^1.16.4"
-  }
+  },
+  "devDependencies": {}
 }

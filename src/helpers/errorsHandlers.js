@@ -6,9 +6,10 @@ const internalServerError = (result, message) => {
         message: message,
       }
     })
+  }
 }
 
-export default expiredTokenError = (result) => {
+const expiredTokenError = (result, isRefresh = false) => {
   let data = {
     results: {
       message: 'expired token'
@@ -18,4 +19,8 @@ export default expiredTokenError = (result) => {
     data.results['isRefresh'] = false
   }
   result.status(406).json(data)
+};
+export {
+  expiredTokenError,
+  internalServerError
 }
