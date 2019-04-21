@@ -191,8 +191,8 @@ router.post('/login', (req, res, next)=> {
 })
 
 router.post('/logout', (req, res, next)=> {
-  const {email, password} = req.body
-  User.findOne({email})
+  const {refreshToken} = req.body
+  User.findOne({refreshToken})
     .then((userModel)=>{
       userModel.generateAccessToken()
       userModel.generateRefreshToken()
