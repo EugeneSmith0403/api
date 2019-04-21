@@ -55,7 +55,11 @@ router.post('/checkUserSignUp', (req, res, next) => {
           })
       }else {
         res.status(500).json({
-          errors: 'User existed!'
+          results: {
+            errors:  {
+              message: 'User existed!'
+            }
+          }
         })
       }
     })
@@ -191,9 +195,11 @@ router.post('/login', (req, res, next)=> {
 })
 
 router.post('/logout', (req, res, next)=> {
-  const {refreshToken} = req.body
-  User.findOne({refreshToken})
+  const {accessToken} = req.body
+  console.log(req.body)
+  User.findOne({accessToken})
     .then((userModel)=>{
+      console.log(userModel)
       userModel.generateAccessToken()
       userModel.generateRefreshToken()
       res.status(200).json({

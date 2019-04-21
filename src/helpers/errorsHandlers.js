@@ -12,11 +12,13 @@ const internalServerError = (result, message) => {
 const expiredTokenError = (result, isRefresh = false) => {
   let data = {
     results: {
-      message: 'expired token'
+      errors: {
+        message: 'expired token'
+      }
     }
   }
   if(isRefresh) {
-    data.results['isRefresh'] = false
+    data.results.errors['isRefresh'] = false
   }
   result.status(406).json(data)
 };

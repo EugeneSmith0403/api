@@ -12,7 +12,11 @@ export default (req, res, next) => {
         if(decode && decode['email']) {
           User.remove({email:decode.email}).exec().then((user)=>{
             res.status(401).json({
-              errors: 'Unauthorized. Invalid token, please signup again'
+              results: {
+                errors: {
+                  message: 'Unauthorized. Invalid token, please signup again'
+                }
+              }
             })
           })
         }else {
