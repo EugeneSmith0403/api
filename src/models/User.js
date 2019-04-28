@@ -13,18 +13,23 @@ function decrypt(text, password){
 }
 
 const schema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
+  age: { type: Number },
+  phone: { type: String  },
   email: {
     type: String,
     required: true,
     lowercase: true,
     index: true,
-    unique: true
+    unique: true,
+    match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   },
   username: {
     type: String,
     index: true,
     unique: true
   },
+  image: { type: String },
   passwordHash: {type: String, required: true},
   publicKey: { type: String, required: true },
   accessToken: { type: String },

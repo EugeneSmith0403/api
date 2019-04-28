@@ -196,7 +196,6 @@ router.post('/login', (req, res, next)=> {
 
 router.post('/logout', (req, res, next)=> {
   const {accessToken} = req.body
-  console.log(req.body)
   User.findOne({accessToken})
     .then((userModel)=>{
       console.log(userModel)

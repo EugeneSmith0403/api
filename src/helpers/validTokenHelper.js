@@ -10,7 +10,7 @@ const userData = (user) => {
   }
 }
 
-const getAfterUpdateRefreshToken = (user, result, request) => {
+const getAfterUpdateRefreshToken = (user, result, request, next) => {
   user.generateAccessToken()
   user.generateRefreshToken()
   user.save()
@@ -24,7 +24,7 @@ const getAfterUpdateRefreshToken = (user, result, request) => {
       request.currentUser = userInfo;
       next()
     })
-    .catch(internalServerError(result, 'somethings wrong, try again'))
+    .catch(internalServerError(result, '1somethings wrong, try again'))
 }
 
 
@@ -34,7 +34,7 @@ export default (token = '', result, request, next, isRefresh = false) => {
       User.findOne({email: decode.email})
         .then((user)=>{
           if(isRefresh) {
-            getAfterUpdateRefreshToken(user, result, request)
+            getAfterUpdateRefreshToken(user, result, request, next)
           }else {
             request.currentUser = {
               ...userData(user),
@@ -43,7 +43,7 @@ export default (token = '', result, request, next, isRefresh = false) => {
             next()
           }
       })
-      .catch(internalServerError(result, 'somethings wrong, try again'));
+      .catch(internalServerError(result, '2somethings wrong, try again'));
     }else {
       expiredTokenError(result, isRefresh)
     }

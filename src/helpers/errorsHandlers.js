@@ -18,7 +18,7 @@ const expiredTokenError = (result, isRefresh = false) => {
     }
   }
   if(isRefresh) {
-    data.results.errors['isRefresh'] = false
+    data.results.errors['isLogout'] = true
   }
   result.status(406).json(data)
 };
