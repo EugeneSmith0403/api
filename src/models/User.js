@@ -55,17 +55,19 @@ schema.methods.generateAccessToken = function generateAccessToken() {
 }
 
 schema.methods.generateRefreshToken = function generateRefreshToken() {
-  const month = {expiresIn: '1m'}
-  this.refreshToken = this.generateJWT(month)
+  const month = {expiresIn: '1h'}
+  const isRefreshToken = true;
+  this.refreshToken = this.generateJWT(month, isRefreshToken)
 }
 
 
-schema.methods.generateJWT = function generateJWT(expiresIn = {}) {
+schema.methods.generateJWT = function generateJWT(expiresIn = {}, isRefreshToken = false) {
   return jwt.sign(
     {
       email: this.email,
       username: this.username,
       confirmed: this.confirmed,
+      isRefreshToken
     },
     process.env.JWT_SECRET,
     expiresIn

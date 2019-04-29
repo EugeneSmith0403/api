@@ -11,15 +11,7 @@ const userInformation = (user) => {
 }
 
 export default (req,res, next) => {
-  const {accessToken, refreshToken} = req.body
-  const clearAccessToken = accessToken && accessToken.split(' ')[1]
-
-  if(accessToken) {
-    checkValidToken(clearAccessToken, res, req, next)
-  }
-
-  if(refreshToken) {
-    checkValidToken(refreshToken, res, req, next, true)
-  }
-
+  const token = req.headers.authorization
+  const clearToken = token && token.split(' ')[1]
+  checkValidToken(clearToken, res, req, next)
 }

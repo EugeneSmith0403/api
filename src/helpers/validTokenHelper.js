@@ -28,12 +28,12 @@ const getAfterUpdateRefreshToken = (user, result, request, next) => {
 }
 
 
-export default (token = '', result, request, next, isRefresh = false) => {
+export default (token = '', result, request, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, decode)=> {
     if(!err) {
       User.findOne({email: decode.email})
         .then((user)=>{
-          if(isRefresh) {
+          if(decode && decode.isRefreshToken) {
             getAfterUpdateRefreshToken(user, result, request, next)
           }else {
             request.currentUser = {
@@ -45,7 +45,7 @@ export default (token = '', result, request, next, isRefresh = false) => {
       })
       .catch(internalServerError(result, '2somethings wrong, try again'));
     }else {
-      expiredTokenError(result, isRefresh)
+      expiredTokenError(result, decode && decode.isRefreshToken)
     }
   })
 }

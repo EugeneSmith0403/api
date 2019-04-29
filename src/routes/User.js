@@ -5,6 +5,7 @@ import confirmUserEntrance from './../helpers/mailer'
 import validMailToken from './../middleware/validMailToken'
 import authentication from './../middleware/authentication'
 import User from './../models/User'
+const mongoose = require('mongoose')
 
 const router = express.Router()
 const secret = process.env.SECRET
@@ -41,7 +42,10 @@ router.post('/checkUserSignUp', (req, res, next) => {
     const {email} = req.body
     User.findOne({email}).then((record)=>{
       if(!record) {
-        const user = new User({email})
+        const user = new User({
+          _id: new mongoose.Types.ObjectId(),
+          email
+        })
         user.generatePublicKey()
         user.passwordHash = bcrypt.hashSync(Math.random().toString(), 10);
         user.save().then((savedRecord)=>{
@@ -195,8 +199,9 @@ router.post('/login', (req, res, next)=> {
 })
 
 router.post('/logout', (req, res, next)=> {
-  const {accessToken} = req.body
-  User.findOne({accessToken})
+  const token = req.headers.authorization
+  const clearToken = token && token.split(' ')[1];
+  User.findOne({accessToken: clearToken})
     .then((userModel)=>{
       console.log(userModel)
       userModel.generateAccessToken()
