@@ -64,6 +64,7 @@ schema.methods.generateRefreshToken = function generateRefreshToken() {
 schema.methods.generateJWT = function generateJWT(expiresIn = {}, isRefreshToken = false) {
   return jwt.sign(
     {
+      id: this._id,
       email: this.email,
       username: this.username,
       confirmed: this.confirmed,

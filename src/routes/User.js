@@ -5,10 +5,34 @@ import confirmUserEntrance from './../helpers/mailer'
 import validMailToken from './../middleware/validMailToken'
 import authentication from './../middleware/authentication'
 import User from './../models/User'
+import _ from 'lodash'
+import multer from 'multer'
 const mongoose = require('mongoose')
 
 const router = express.Router()
 const secret = process.env.SECRET
+
+const fileFilter = (req, file, cb) => {
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+      cb(new Error("error uploaded"), true)
+  }else {
+      cb(new Error("error uploaded"), false)
+  }
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
+})
+
+const upload = multer({ storage: storage, limits: {
+    fileSize: 1024 * 1024 * 5,
+    fileFilter: fileFilter
+}})
 
 
 const processingUserEntrance = (userModel, result) => {
@@ -137,6 +161,50 @@ router.post('/fetchCurrentUser', authentication, (req, res, next)=> {
   })
 })
 
+//TODO load image
+router.put('/userProfile', authentication, upload.single('image'), (req, res, next)=> {
+  const filterParams = ['age', 'phone', 'email', 'username', 'image'];
+  const body = req.body
+  const email = body.email
+  console.log(req.file)
+  let updatedParams = {};
+  _.forEach(body, (value, prop)=> {
+      if(filterParams.indexOf(prop) !== -1) {
+        updatedParams[prop] = value;
+      }
+  })
+
+  if(req.file && req.file.path) {
+    console.log(req)
+    updatedParams['image'] = req.file.path;
+  }
+
+    User.findOneAndUpdate(
+      { email },
+      { ...updatedParams, confirmed: true },
+      { new: true }
+    ).then((results)=>{
+      const { age, phone, email, username, image} = results
+      res.status(201).json({
+        message: 'User updated',
+        results: {
+            age,
+            phone,
+            email,
+            username,
+            image
+        },
+        type: 'POST'
+      })
+    })
+    .catch((err)=>{
+        res.status(500).status({
+          message: err
+        })
+    })
+
+})
+
 
 /* Проверяю существование Юзера перед login если все ок то возвращаю publicKey для шифрования пароля*/
 router.post('/checkUserLogin', (req, res, next) => {
@@ -203,7 +271,6 @@ router.post('/logout', (req, res, next)=> {
   const clearToken = token && token.split(' ')[1];
   User.findOne({accessToken: clearToken})
     .then((userModel)=>{
-      console.log(userModel)
       userModel.generateAccessToken()
       userModel.generateRefreshToken()
       res.status(200).json({

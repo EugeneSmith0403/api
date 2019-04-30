@@ -6,7 +6,10 @@ const userData = (user) => {
   return {
     email: user.email,
     username: user.username,
-    confirmed: user.confirmed
+    confirmed: user.confirmed,
+    phone: user.phone,
+    image: user.images,
+    age: user.age
   }
 }
 
