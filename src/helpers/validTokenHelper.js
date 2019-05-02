@@ -34,6 +34,7 @@ const getAfterUpdateRefreshToken = (user, result, request, next) => {
 export default (token = '', result, request, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, decode)=> {
     if(!err) {
+      request.userId = decode.id;
       User.findOne({email: decode.email})
         .then((user)=>{
           if(decode && decode.isRefreshToken) {

@@ -25,7 +25,10 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
+    const ext = file.originalname.split('.')[1]
+    const imagePath = file.fieldname + `-${Date.now()}.${ext}`
+    req.userImagePath  = imagePath;
+    cb(null, imagePath)
   }
 })
 
@@ -47,7 +50,8 @@ const processingUserEntrance = (userModel, result) => {
                 accessToken: savedRecord.accessToken,
                 refreshToken: savedRecord.refreshToken,
                 username: savedRecord.username,
-                email: savedRecord.email
+                email: savedRecord.email,
+                phone: savedRecord.phone
             }
           }
         })
@@ -162,40 +166,43 @@ router.post('/fetchCurrentUser', authentication, (req, res, next)=> {
 })
 
 //TODO load image
-router.put('/userProfile', authentication, upload.single('image'), (req, res, next)=> {
+router.put('/userProfile', authentication, upload.single('file'), (req, res, next)=> {
   const filterParams = ['age', 'phone', 'email', 'username', 'image'];
   const body = req.body
-  const email = body.email
-  console.log(req.file)
   let updatedParams = {};
   _.forEach(body, (value, prop)=> {
       if(filterParams.indexOf(prop) !== -1) {
         updatedParams[prop] = value;
       }
   })
+    console.log('her--->1', req.userId)
 
   if(req.file && req.file.path) {
-    console.log(req)
-    updatedParams['image'] = req.file.path;
+    updatedParams['image'] = req.userImagePath;
   }
-
     User.findOneAndUpdate(
-      { email },
+      { _id: req.userId },
       { ...updatedParams, confirmed: true },
       { new: true }
     ).then((results)=>{
-      const { age, phone, email, username, image} = results
-      res.status(201).json({
-        message: 'User updated',
-        results: {
-            age,
-            phone,
-            email,
-            username,
-            image
-        },
-        type: 'POST'
-      })
+      if(results) {
+        const { age, phone, email, username, image} = results
+        res.status(201).json({
+          message: 'User updated',
+          results: {
+              age,
+              phone,
+              email,
+              username,
+              image
+          },
+          type: 'POST'
+        })
+      }else{
+        res.status(500).status({
+          message: 'user doesn\'t found!'
+        })
+      }
     })
     .catch((err)=>{
         res.status(500).status({
@@ -265,12 +272,13 @@ router.post('/login', (req, res, next)=> {
   })
 
 })
-
+//fix
 router.post('/logout', (req, res, next)=> {
   const token = req.headers.authorization
   const clearToken = token && token.split(' ')[1];
   User.findOne({accessToken: clearToken})
     .then((userModel)=>{
+      console.log(userModel)
       userModel.generateAccessToken()
       userModel.generateRefreshToken()
       res.status(200).json({

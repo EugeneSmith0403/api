@@ -55,7 +55,7 @@ schema.methods.generateAccessToken = function generateAccessToken() {
 }
 
 schema.methods.generateRefreshToken = function generateRefreshToken() {
-  const month = {expiresIn: '1h'}
+  const month = {expiresIn: '30d'}
   const isRefreshToken = true;
   this.refreshToken = this.generateJWT(month, isRefreshToken)
 }
