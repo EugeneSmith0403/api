@@ -9,7 +9,8 @@ const userData = (user) => {
     confirmed: user.confirmed,
     phone: user.phone,
     image: user.images,
-    age: user.age
+    age: user.age,
+    image: user.image
   }
 }
 
