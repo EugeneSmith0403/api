@@ -4,6 +4,8 @@ import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import dotenv from "dotenv"
 import user from './routes/User'
+import trip from './routes/Trip'
+import booking from './routes/Booking'
 
 dotenv.config()
 
@@ -27,6 +29,8 @@ mongoose.connect(process.env.MONGODB_URL,  {useNewUrlParser: true, useCreateInde
 
 
 app.use('/api', user)
+app.use('/api/trip', trip)
+app.use('/api/book', booking)
 
 
 app.listen(8080, () => console.log("Running on localhost:8080"));

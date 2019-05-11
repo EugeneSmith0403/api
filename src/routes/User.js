@@ -175,7 +175,7 @@ router.put('/userProfile', authentication, upload.single('file'), (req, res, nex
         updatedParams[prop] = value;
       }
   })
-    console.log('her--->1', req.userId)
+
 
   if(req.file && req.file.path) {
     updatedParams['image'] = req.userImagePath;
