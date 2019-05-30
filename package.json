@@ -34,7 +34,8 @@
     "node-rsa": "^1.0.5",
     "nodemailer": "^6.1.0",
     "nodemon": "^1.18.10",
-    "prettier": "^1.16.4"
+    "prettier": "^1.16.4",
+    "react-day-picker": "^7.3.0"
   },
   "devDependencies": {},
   "publicPath": "http://localhost:8080/uploads"

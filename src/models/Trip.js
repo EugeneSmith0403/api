@@ -11,10 +11,11 @@ const schema = new mongoose.Schema({
   to: { type: Number, required: true },
   dateStart: { type: Date, default: Date.now },
   dateFinished: { type: Date, default: null},
-  maxPeople: { type: Number },
+  maxPlaces: { type: Number },
   occupiedPlaces: { type: Number },
   cost: { type: Number },
   carModel: { type: String },
+  carYear: { type: String },
   bookedPeople: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
