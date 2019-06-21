@@ -7,8 +7,14 @@ const schema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  from: { type: Number, required: true },
-  to: { type: Number, required: true },
+  from: {
+    lat: {type: Number, required: true },
+    lng: {type: Number, required: true }
+  },
+  to: {
+    lat: {type: Number, required: true },
+    lng: {type: Number, required: true }
+  },
   dateStart: { type: Date, default: Date.now },
   dateFinished: { type: Date, default: null},
   maxPlaces: { type: Number },

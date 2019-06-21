@@ -2,6 +2,7 @@ import express from 'express'
 import authentication from './../middleware/authentication'
 import Trip from './../models/Trip'
 import _ from 'lodash'
+const mongoose = require('mongoose')
 
 const router = express.Router()
 
@@ -20,12 +21,20 @@ const updateBooking = (response, tripId, updatedField, action) => {
 }
 
 router.get('/search', (req, res, next)=> {
-  const {from, to} = req.body
+  const {from, to} = req.query
   let filter = {}
   if(from && to) {
-     filter = {from, to}
+     filter = {
+       'from.lat': from.split(',')[0],
+       'from.lng': from.split(',')[1],
+       'to.lat': to.split(',')[0],
+       'to.lng': to.split(',')[1]
+     }
   }
-  Trip.find(filter).populate('owner bookedPeople applyPeople cancelPeople').exec()
+
+  Trip.find(filter)
+  .populate('owner', 'image username phone age email')
+  .exec()
   .then((results)=> {
     res.status(200).json({
       results
@@ -53,6 +62,7 @@ router.get('/:id', (req, res, next)=> {
 router.post('/create', authentication, (req, res, next)=>{
   const {from, to, dateStart, dateFinished, maxPeople, occupiedPlaces, cost, carModel } = req.body
   const trip = new Trip({
+    _id: new mongoose.Types.ObjectId(),
     owner: req.userId,
     from,
     to,
@@ -67,6 +77,7 @@ router.post('/create', authentication, (req, res, next)=>{
     cancelPeople: []
   });
 
+
   trip
     .save()
     .then((results)=>{
@@ -74,7 +85,7 @@ router.post('/create', authentication, (req, res, next)=>{
       results
     })
   }).catch((error)=>{
-    req.status(500).json({
+    res.status(500).json({
       results: {
         message: error
       }
