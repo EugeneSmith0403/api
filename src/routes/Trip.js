@@ -125,15 +125,15 @@ router.post("/create", authentication, (req, res, next) => {
     });
 });
 
-router.put("/update/:id", authentication, (req, res, next) => {
+router.put("/update/:id", /*authentication,*/ (req, res, next) => {
   const { id } = req.params;
   const filterParams = [];
   const body = req.body;
   let updatedParams = {};
   _.forEach(body, (value, prop) => {
-    if (filterParams.indexOf(prop) !== -1) {
+  //  if (filterParams.indexOf(prop) !== -1) {
       updatedParams[prop] = value;
-    }
+//    }
   });
   Trip.findOneAndUpdate(
     {
