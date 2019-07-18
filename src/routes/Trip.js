@@ -146,7 +146,7 @@ router.put("/update/:id", /*authentication,*/ (req, res, next) => {
     {
       new: true
     }
-  )
+  ).populate("owner", "image username phone age email")
     .then(newRecord => {
       res.status(201).json({
         message: "Trip updated",
