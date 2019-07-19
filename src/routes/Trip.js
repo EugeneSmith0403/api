@@ -88,7 +88,7 @@ router.post("/create", authentication, (req, res, next) => {
     to,
     dateStart,
     dateFinished,
-    maxPeople,
+    maxPlaces,
     occupiedPlaces,
     cost,
     carModel
@@ -132,7 +132,9 @@ router.put("/update/:id", /*authentication,*/ (req, res, next) => {
   let updatedParams = {};
   _.forEach(body, (value, prop) => {
   //  if (filterParams.indexOf(prop) !== -1) {
-      updatedParams[prop] = value;
+      if(prop !== 'updated') {
+        updatedParams[prop] = value;
+      }
 //    }
   });
   Trip.findOneAndUpdate(
