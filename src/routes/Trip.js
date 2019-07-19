@@ -100,7 +100,7 @@ router.post("/create", authentication, (req, res, next) => {
     to,
     dateStart,
     dateFinished,
-    maxPeople,
+    maxPlaces,
     occupiedPlaces,
     cost,
     carModel,
@@ -166,12 +166,21 @@ router.put("/update/:id", /*authentication,*/ (req, res, next) => {
 });
 
 router.delete("/delete/:id", (req, res, next) => {
-  const { id } = req.params.id;
+  const delId = req.params.id;
   Trip.remove({
-    _id: id
+    _id: delId
   }).then(result => {
     res.status(200).json({
-      results: "Trip removed"
+      results: {
+        message:"Trip removed",
+        id: delId
+      },
+    });
+  }).catch(error => {
+    req.status(500).json({
+      results: {
+        message: error
+      }
     });
   });
 });
